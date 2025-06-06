@@ -20,7 +20,7 @@ export const Titlebar: React.FC = () => {
   }
 
   return (
-    <Box bg="blue.8" >
+    <Box bg="blue.8" className={classes.header}>
       <header>
         <Flex justify="space-between" py={5} align="center" h="100%">
           <Group>
@@ -29,7 +29,7 @@ export const Titlebar: React.FC = () => {
             </Text>
             <Button
               onClick={() => window.electron.ipcRenderer.send('check-for-updates')}
-              className="my-auto"
+              className={classes.buttons}
               leftSection={<TbCloudDownload />}
               size="compact-sm"
               me={20}
