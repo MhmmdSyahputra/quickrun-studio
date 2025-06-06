@@ -7,20 +7,21 @@ on:
 
 jobs:
   release-windows:
-    runs-on: windows-latest  # Menggunakan Windows runner
+    runs-on: windows-latest
     strategy:
       matrix:
-        electron-arch: [x64, ia32]  # Membangun untuk arsitektur 64-bit dan 32-bit
+        electron-arch: [x64, ia32]
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4  # Update ke v4
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4  # Update ke v4
         with:
-          node-version: 18
+          node-version: 20  # Rekomendasi versi Node.js LTS terbaru
+          cache: 'npm'
 
       - name: Clean install
         run: |
@@ -34,10 +35,10 @@ jobs:
       - name: Build Windows installer
         run: npx electron-builder --win --${{ matrix.electron-arch }} --publish always
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Pastikan menggunakan GITHUB_TOKEN bukan GH_TOKEN
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Update ke v4
         with:
           name: quickrun-studio-windows-${{ matrix.electron-arch }}
           path: |
