@@ -22,6 +22,10 @@
     "build:linux": "electron-vite build && electron-builder --linux"
   },
   "build": {
+    "productName": "quickrun-studio",
+    "appId": "quickrun-studio",
+    "asar": true,
+    "asarUnpack": "**\\*.{node,dll}",
     "files": [
       "out/**/*",
       "node_modules/**/*",
@@ -29,6 +33,11 @@
     ],
     "directories": {
       "buildResources": "build"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true
     }
   },
   "dependencies": {

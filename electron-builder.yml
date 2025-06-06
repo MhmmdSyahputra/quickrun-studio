@@ -17,6 +17,7 @@ asarUnpack:
 win:
   executableName: quickrun-studio
 nsis:
+  oneClick: false
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
