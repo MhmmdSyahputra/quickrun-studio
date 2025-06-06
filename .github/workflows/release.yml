@@ -8,6 +8,7 @@ on:
 jobs:
   release-windows:
     runs-on: windows-latest
+    timeout-minutes: 30
     strategy:
       matrix:
         electron-arch: [x64, ia32]
