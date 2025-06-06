@@ -33,5 +33,3 @@ jobs:
 
       - name: Build electron app
         run: npx electron-builder --publish always
-
-
