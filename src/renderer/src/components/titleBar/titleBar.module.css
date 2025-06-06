@@ -3,6 +3,7 @@
   /* margin: auto; */
   background-color: teal;
   color: white;
+  -webkit-app-region: drag;
 }
 
 .buttons {
