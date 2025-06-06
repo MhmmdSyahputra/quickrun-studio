@@ -1,4 +1,4 @@
-name: Release
+name: Release Windows
 
 on:
   push:
@@ -6,32 +6,41 @@ on:
       - 'v*'
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  release-windows:
+    runs-on: windows-latest  # Menggunakan Windows runner
+    strategy:
+      matrix:
+        electron-arch: [x64, ia32]  # Membangun untuk arsitektur 64-bit dan 32-bit
+    
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Clean node_modules and electron-builder cache
+      - name: Clean install
         run: |
-          rm -rf node_modules package-lock.json
-          rm -rf ~/.cache/electron-builder
-
-      - name: Install dependencies
-        run: npm install
+          Remove-Item -Recurse -Force node_modules
+          Remove-Item -Force package-lock.json -ErrorAction SilentlyContinue
+          npm install
 
       - name: Build app
         run: npm run build
 
-      - name: Fix app-builder permission
-        run: chmod +x node_modules/app-builder-bin/linux/x64/app-builder
-      
-      - name: Clean up old snap file
-        run: rm -f dist/*.snap
+      - name: Build Windows installer
+        run: npx electron-builder --win --${{ matrix.electron-arch }} --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Build electron app
-        run: npx electron-builder --publish always
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: quickrun-studio-windows-${{ matrix.electron-arch }}
+          path: |
+            dist/*.exe
+            dist/*.blockmap
+            dist/*.yml
