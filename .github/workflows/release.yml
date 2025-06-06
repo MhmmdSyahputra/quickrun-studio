@@ -25,8 +25,8 @@ jobs:
       - name: Clear electron-builder cache
         run: rm -rf ~/.cache/electron-builder
 
-      - name: Install snapcraft (only if snap target needed)
-        run: sudo snap install snapcraft --classic
+      # - name: Install snapcraft (only if snap target needed)
+      #   run: sudo snap install snapcraft --classic
 
       - name: Fix app-builder permission
         run: chmod +x node_modules/app-builder-bin/linux/x64/app-builder
