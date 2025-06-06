@@ -1,24 +1,22 @@
-name: Release
+steps:
+  - uses: actions/checkout@v3
 
-on:
-  push:
-    tags:
-      - 'v*'
+  - name: Setup Node.js
+    uses: actions/setup-node@v3
+    with:
+      node-version: 18
 
-jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      - name: Install dependencies
-        run: npm install
-      - name: Build project
-        run: npm run build
-      - name: Build & publish
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: npx electron-builder --publish always
+  - name: Install dependencies
+    run: npm install
+
+  - name: Clear electron-builder cache
+    run: rm -rf ~/.cache/electron-builder
+
+  - name: Install snapcraft (only if snap target needed)
+    run: sudo snap install snapcraft --classic
+
+  - name: Fix app-builder permission
+    run: chmod +x node_modules/app-builder-bin/linux/x64/app-builder
+
+  - name: Build electron app
+    run: npx electron-builder --publish always
