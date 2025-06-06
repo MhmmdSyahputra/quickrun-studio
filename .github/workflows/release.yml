@@ -30,6 +30,10 @@ jobs:
 
       - name: Fix app-builder permission
         run: chmod +x node_modules/app-builder-bin/linux/x64/app-builder
+      
+      - name: Clean up old snap file
+        run: rm -f dist/*.snap
 
       - name: Build electron app
         run: npx electron-builder --publish always
+
