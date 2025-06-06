@@ -16,14 +16,16 @@ jobs:
         with:
           node-version: 18
 
+      - name: Clean node_modules and electron-builder cache
+        run: |
+          rm -rf node_modules package-lock.json
+          rm -rf ~/.cache/electron-builder
+
       - name: Install dependencies
         run: npm install
 
       - name: Build app
         run: npm run build
-
-      - name: Clear electron-builder cache
-        run: rm -rf ~/.cache/electron-builder
 
       # - name: Install snapcraft (only if snap target needed)
       #   run: sudo snap install snapcraft --classic
@@ -34,6 +36,8 @@ jobs:
       - name: Clean up old snap file
         run: rm -f dist/*.snap
 
+      - name: Debug electron-builder config
+        run: npx electron-builder --show-config
+
       - name: Build electron app
         run: npx electron-builder --publish always
-
