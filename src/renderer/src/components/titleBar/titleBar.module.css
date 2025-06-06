@@ -1,0 +1,10 @@
+.header {
+  /* height: 40px; */
+  /* margin: auto; */
+  background-color: teal;
+  color: white;
+}
+
+.buttons {
+  -webkit-app-region: no-drag;
+}
