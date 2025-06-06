@@ -27,17 +27,11 @@ jobs:
       - name: Build app
         run: npm run build
 
-      # - name: Install snapcraft (only if snap target needed)
-      #   run: sudo snap install snapcraft --classic
-
       - name: Fix app-builder permission
         run: chmod +x node_modules/app-builder-bin/linux/x64/app-builder
       
       - name: Clean up old snap file
         run: rm -f dist/*.snap
-
-      # - name: Debug electron-builder config
-      #   run: npx electron-builder --show-config
 
       - name: Build electron app
         run: npx electron-builder --publish always
