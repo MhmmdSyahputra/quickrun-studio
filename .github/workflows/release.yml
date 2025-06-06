@@ -13,19 +13,18 @@ jobs:
         electron-arch: [x64, ia32]
     
     steps:
-      - uses: actions/checkout@v4  
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4  
+        uses: actions/setup-node@v4
         with:
-          node-version: 20  
+          node-version: 20
           cache: 'npm'
 
-      - name: Clean install
-        run: |
-          npm install
+      - name: Install dependencies
+        run: npm install
 
       - name: Build app
         run: npm run build
@@ -33,10 +32,15 @@ jobs:
       - name: Build Windows installer
         run: npx electron-builder --win --${{ matrix.electron-arch }} --publish always
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}  
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # PASTIKAN INI BENAR
+
+      - name: Verify artifacts
+        run: |
+          ls -la dist/
+          cat dist/latest.yml  # Pastikan file ini ada
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4  
+        uses: actions/upload-artifact@v4
         with:
           name: quickrun-studio-windows-${{ matrix.electron-arch }}
           path: |

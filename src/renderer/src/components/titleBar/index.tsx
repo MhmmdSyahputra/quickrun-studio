@@ -20,7 +20,7 @@ export const Titlebar: React.FC = () => {
   }
 
   return (
-    <Box bg="blue.8" className={classes.header}>
+    <Box bg="blue.8" >
       <header>
         <Flex justify="space-between" py={5} align="center" h="100%">
           <Group>

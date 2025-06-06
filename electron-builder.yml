@@ -45,3 +45,4 @@ publish:
   provider: github
   owner: MhmmdSyahputra
   repo: quickrun-studio
+  publishAutoUpdate: true
