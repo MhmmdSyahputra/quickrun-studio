@@ -19,6 +19,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Build app
+        run: npm run build
+
       - name: Clear electron-builder cache
         run: rm -rf ~/.cache/electron-builder
 
@@ -30,4 +33,5 @@ jobs:
 
       - name: Build electron app
         run: npx electron-builder --publish always
+
 

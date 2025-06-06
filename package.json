@@ -3,7 +3,7 @@
   "productName": "QuickRun Studio",
   "version": "1.0.0",
   "description": "A tool to quickly run multiple registered developer tools or commands with one click.",
-  "main": "./out/main/index.js",
+  "main": "./dist/main/index.js",
   "author": "example.com",
   "homepage": "https://electron-vite.org",
   "scripts": {
