@@ -16,6 +16,8 @@ jobs:
           node-version: '18'
       - name: Install dependencies
         run: npm install
+      - name: Build project
+        run: npm run build
       - name: Build & publish
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
