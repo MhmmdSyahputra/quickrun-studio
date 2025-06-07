@@ -9,6 +9,7 @@ function App(): React.JSX.Element {
       <MantineProvider>
         <Notifications />
         <Titlebar />
+        <br /> <br />
         <Routes>
           <Route path="/" element={<HomePage />} />
         </Routes>

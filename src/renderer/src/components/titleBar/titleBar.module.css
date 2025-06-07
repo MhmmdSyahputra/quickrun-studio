@@ -4,6 +4,9 @@
   background-color: teal;
   color: white;
   -webkit-app-region: drag;
+  width: 100%;
+  position: fixed;
+  z-index: 999;
 }
 
 .buttons {

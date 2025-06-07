@@ -125,6 +125,13 @@ autoUpdater.on('update-available', () => {
     })
 })
 
+autoUpdater.on('download-progress', (progressObj) => {
+  const progress = Math.round(progressObj.percent)
+  if (mainWindow) {
+    mainWindow.webContents.send('update:download-progress', progress)
+  }
+})
+
 autoUpdater.on('update-downloaded', () => {
   dialog
     .showMessageBox(mainWindow, {

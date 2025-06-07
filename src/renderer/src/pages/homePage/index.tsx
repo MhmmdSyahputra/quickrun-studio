@@ -7,7 +7,6 @@ import {
   TbCheck,
   TbX,
   TbPlayerPlay,
-  TbRun,
   TbFolder,
   TbCommand
 } from 'react-icons/tb'
@@ -166,7 +165,7 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="container py-4" style={{ maxWidth: 900 }}>
-      <h3 className="mb-4 text-center">Project Startup Launcher</h3>
+      <h3 className="mb-4 text-center">Startup Launcher</h3>
 
       {/* Form tambah grup */}
       <div className="input-group mb-4">
@@ -240,14 +239,14 @@ export const HomePage: React.FC = () => {
                     <TbEdit />
                   </button>
                   <button
-                    className="btn btn-success btn-sm me-2 d-flex align-items-center"
+                    className="btn btn-sm btn-primary me-2 d-flex align-items-center"
                     onClick={(e) => {
                       e.stopPropagation()
                       runGroup(group.id)
                     }}
                     title="Jalankan Semua"
                   >
-                    <TbRun />
+                    <TbPlayerPlay />
                   </button>
                   <button
                     className="btn btn-danger btn-sm d-flex align-items-center"
