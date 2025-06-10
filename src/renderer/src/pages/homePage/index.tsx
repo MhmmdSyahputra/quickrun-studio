@@ -1,15 +1,20 @@
-import React, { useEffect, useState } from 'react'
 import {
-  TbPlaylistAdd,
-  TbPlus,
-  TbEdit,
-  TbTrash,
-  TbCheck,
-  TbX,
-  TbPlayerPlay,
-  TbFolder,
-  TbCommand
-} from 'react-icons/tb'
+  Grid,
+  Title,
+  Text,
+  Box,
+  TextInput,
+  ActionIcon,
+  Button,
+  Group,
+  Modal,
+  Paper,
+  Stack,
+  Tooltip,
+  SimpleGrid
+} from '@mantine/core'
+import React, { useEffect, useState } from 'react'
+import { TbPlaylistAdd, TbPlus, TbEdit, TbTrash, TbCheck, TbX, TbPlayerPlay } from 'react-icons/tb'
 
 interface CommandEntry {
   id: string
@@ -45,11 +50,20 @@ export const HomePage: React.FC = () => {
     label: '',
     command: ''
   })
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
 
   // Simpan ke localStorage setiap kali groups berubah
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(groups))
   }, [groups])
+
+  // Auto-select first group if none selected
+  useEffect(() => {
+    if (groups.length > 0 && !selectedGroup) {
+      setSelectedGroup(groups[0].id)
+    }
+  }, [groups, selectedGroup])
 
   // Tambah grup baru
   const addGroup = (): void => {
@@ -61,6 +75,7 @@ export const HomePage: React.FC = () => {
     }
     setGroups([...groups, newGroup])
     setNewGroupName('')
+    setSelectedGroup(newGroup.id)
   }
 
   // Tambah command ke grup
@@ -99,6 +114,9 @@ export const HomePage: React.FC = () => {
   // Hapus grup beserta command-nya
   const removeGroup = (groupId: string): void => {
     setGroups(groups.filter((group) => group.id !== groupId))
+    if (selectedGroup === groupId) {
+      setSelectedGroup(groups.length > 1 ? groups[0].id : null)
+    }
   }
 
   // Jalankan semua command di grup
@@ -163,235 +181,406 @@ export const HomePage: React.FC = () => {
     setEditingEntryId(null)
   }
 
+  const selectedGroupData = groups.find((group) => group.id === selectedGroup)
+
   return (
-    <div className="container py-4" style={{ maxWidth: 900 }}>
-      <h3 className="mb-4 text-center">Startup Launcher</h3>
+    <div style={{ padding: '1rem' }}>
+      <Grid>
+        <Grid.Col
+          span={5}
+          p="xl"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+            borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+            height: '90vh'
+          }}
+        >
+          {/* Header Section */}
+          <Box mb="xl">
+            <Title order={2} mb="xs">
+              Command Center
+            </Title>
+            <Text size="sm" c="dimmed">
+              Manage your project command groups and shortcuts
+            </Text>
+          </Box>
 
-      {/* Form tambah grup */}
-      <div className="input-group mb-4">
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Tambah Grup Baru (Contoh: Backend)"
-          value={newGroupName}
-          onChange={(e) => setNewGroupName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addGroup()}
-        />
-        <button className="btn btn-primary d-flex align-items-center" onClick={addGroup}>
-          <TbPlaylistAdd className="me-1" /> Tambah Grup
-        </button>
-      </div>
-
-      {groups.length === 0 && (
-        <p className="text-center fst-italic">Belum ada grup. Silakan tambah grup dulu.</p>
-      )}
-
-      {/* List grup */}
-      {groups.map((group) => (
-        <div key={group.id} className="mb-4">
-          {/* Header grup */}
-          <div
-            className="d-flex justify-content-between align-items-center p-3 bg-light rounded-top border"
-            style={{ cursor: 'pointer' }}
-            data-bs-toggle="collapse"
-            data-bs-target={`#collapseGroup${group.id}`}
-            aria-expanded="false"
-            aria-controls={`collapseGroup${group.id}`}
+          {/* Add Group Form */}
+          <Paper
+            p="md"
+            mb="xl"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '8px'
+            }}
           >
-            {editingGroupId === group.id ? (
-              <div className="d-flex flex-grow-1 me-2">
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  value={tempGroupName}
-                  onChange={(e) => setTempGroupName(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && saveGroupName(group.id)}
-                />
-                <button
-                  className="btn btn-success btn-sm ms-2 d-flex align-items-center"
-                  onClick={() => saveGroupName(group.id)}
-                >
-                  <TbCheck className="me-1" /> Simpan
-                </button>
-                <button
-                  className="btn btn-secondary btn-sm ms-2 d-flex align-items-center"
-                  onClick={() => setEditingGroupId(null)}
-                >
-                  <TbX className="me-1" /> Batal
-                </button>
-              </div>
-            ) : (
-              <h5 className="mb-0 flex-grow-1 d-flex align-items-center">
-                <TbFolder className="me-2" /> {group.groupName}
-              </h5>
-            )}
-            <div className="d-flex">
-              {editingGroupId !== group.id && (
-                <>
-                  <button
-                    className="btn btn-warning btn-sm me-2 d-flex align-items-center"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      startEditingGroup(group.id, group.groupName)
-                    }}
-                    title="Edit Grup"
-                  >
-                    <TbEdit />
-                  </button>
-                  <button
-                    className="btn btn-sm btn-primary me-2 d-flex align-items-center"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      runGroup(group.id)
-                    }}
-                    title="Jalankan Semua"
-                  >
-                    <TbPlayerPlay />
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm d-flex align-items-center"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      removeGroup(group.id)
-                    }}
-                    title="Hapus Grup"
-                  >
-                    <TbTrash />
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+            <Box mb="xl">
+              <TextInput
+                placeholder="Tambah Grup Baru (Contoh: Backend)"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addGroup()}
+                rightSection={
+                  <ActionIcon color="blue" onClick={addGroup}>
+                    <TbPlaylistAdd size={16} />
+                  </ActionIcon>
+                }
+              />
+            </Box>
+          </Paper>
 
-          {/* Konten grup (collapse) */}
-          <div className="collapse" id={`collapseGroup${group.id}`}>
-            <div className="card card-body mb-3">
-              {group.entries.length === 0 ? (
-                <p className="fst-italic">Belum ada command di grup ini.</p>
+          {/* Projects Grid */}
+          <Title order={4} mb="md">
+            My Projects
+          </Title>
+
+          {groups.length === 0 ? (
+            <Paper
+              p="lg"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                border: '1px dashed rgba(255, 255, 255, 0.1)',
+                textAlign: 'center'
+              }}
+            >
+              <Text c="dimmed" size="sm">
+                No groups yet. Create your first group above.
+              </Text>
+            </Paper>
+          ) : (
+            <SimpleGrid cols={3} spacing="lg" verticalSpacing="lg">
+              {groups.map((group) => (
+                <Paper
+                  key={group.id}
+                  p="xs"
+                  style={{
+                    cursor: 'pointer',
+                    borderRadius: '12px',
+                    border:
+                      selectedGroup === group.id
+                        ? '2px solid #228be6'
+                        : '1px solid rgba(255, 255, 255, 0.08)',
+                    backgroundColor:
+                      selectedGroup === group.id
+                        ? 'rgba(34, 139, 230, 0.15)'
+                        : 'rgba(255, 255, 255, 0.03)',
+                    transition: 'all 0.2s',
+                    ':hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.06)'
+                    }
+                  }}
+                  onClick={() => setSelectedGroup(group.id)}
+                >
+                  {/* Group Icon */}
+                  <Box
+                    bg={selectedGroup === group.id ? 'blue.7' : 'blue.6'}
+                    p="md"
+                    c="white"
+                    h="80px"
+                    style={{
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    <Title order={2} style={{ textTransform: 'uppercase' }}>
+                      {group.groupName.substring(0, 2)}
+                    </Title>
+                  </Box>
+
+                  {/* Group Name and Actions */}
+                  <Group>
+                    {editingGroupId === group.id ? (
+                      <TextInput
+                        value={tempGroupName}
+                        onChange={(e) => setTempGroupName(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && saveGroupName(group.id)}
+                        size="xs"
+                        autoFocus
+                        style={{ flex: 1 }}
+                      />
+                    ) : (
+                      <Text
+                        size="sm"
+                        style={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {group.groupName}
+                      </Text>
+                    )}
+
+                    <Group>
+                      {editingGroupId === group.id ? (
+                        <>
+                          <ActionIcon
+                            color="green"
+                            size="sm"
+                            variant="light"
+                            onClick={() => saveGroupName(group.id)}
+                          >
+                            <TbCheck size={14} />
+                          </ActionIcon>
+                          <ActionIcon
+                            color="gray"
+                            size="sm"
+                            variant="light"
+                            onClick={() => setEditingGroupId(null)}
+                          >
+                            <TbX size={14} />
+                          </ActionIcon>
+                        </>
+                      ) : (
+                        <>
+                          <ActionIcon
+                            color="yellow"
+                            size="sm"
+                            variant="subtle"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              startEditingGroup(group.id, group.groupName)
+                            }}
+                          >
+                            <TbEdit size={14} />
+                          </ActionIcon>
+                          <ActionIcon
+                            color="red"
+                            size="sm"
+                            variant="subtle"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              removeGroup(group.id)
+                            }}
+                          >
+                            <TbTrash size={14} />
+                          </ActionIcon>
+                        </>
+                      )}
+                    </Group>
+                  </Group>
+                </Paper>
+              ))}
+            </SimpleGrid>
+          )}
+        </Grid.Col>
+
+        <Grid.Col
+          span={7}
+          p="xl"
+          style={{
+            borderRadius: '16px',
+            backgroundColor: 'rgba(26, 32, 44, 0.95)', // Dark blue with slight transparency
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}
+        >
+          {selectedGroupData ? (
+            <>
+              {/* Header with Run All button */}
+              <Group mb="lg">
+                <Title order={3} c="white">
+                  {selectedGroupData.groupName}
+                </Title>
+                <Button
+                  variant="light"
+                  color="teal"
+                  size="sm"
+                  onClick={() => runGroup(selectedGroupData.id)}
+                >
+                  Run All
+                </Button>
+              </Group>
+
+              {/* Add Command Button */}
+              <Box mb="xl" style={{ textAlign: 'right' }}>
+                <Button
+                  leftSection={<TbPlus size={18} />}
+                  variant="filled"
+                  color="blue"
+                  size="sm"
+                  onClick={() => {
+                    setLabel('')
+                    setCommand('')
+                    // You'll need to implement modal state management
+                    setShowAddModal(true)
+                  }}
+                >
+                  Add Command
+                </Button>
+              </Box>
+
+              {/* Commands List */}
+              {selectedGroupData.entries.length === 0 ? (
+                <Paper
+                  p="lg"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px dashed rgba(255, 255, 255, 0.1)',
+                    textAlign: 'center'
+                  }}
+                >
+                  <Text c="dimmed" size="sm">
+                    No commands yet. Click Add Command to get started.
+                  </Text>
+                </Paper>
               ) : (
-                <table className="table table-bordered table-hover mb-3">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Label</th>
-                      <th>Command</th>
-                      <th style={{ width: 140 }}>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {group.entries.map((entry) => (
-                      <tr key={entry.id}>
-                        <td>
-                          {editingEntryId === entry.id ? (
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={tempEntry.label}
-                              onChange={(e) =>
-                                setTempEntry({ ...tempEntry, label: e.target.value })
-                              }
-                            />
-                          ) : (
-                            entry.label
-                          )}
-                        </td>
-                        <td>
-                          {editingEntryId === entry.id ? (
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={tempEntry.command}
-                              onChange={(e) =>
-                                setTempEntry({ ...tempEntry, command: e.target.value })
-                              }
-                            />
-                          ) : (
-                            <code>{entry.command}</code>
-                          )}
-                        </td>
-                        <td>
-                          {editingEntryId === entry.id ? (
-                            <div className="d-flex">
-                              <button
-                                className="btn btn-sm btn-success me-2 d-flex align-items-center"
-                                onClick={() => saveEntry(group.id, entry.id)}
-                                title="Simpan"
-                              >
-                                <TbCheck />
-                              </button>
-                              <button
-                                className="btn btn-sm btn-secondary d-flex align-items-center"
-                                onClick={() => setEditingEntryId(null)}
-                                title="Batal"
-                              >
-                                <TbX />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="d-flex">
-                              <button
-                                className="btn btn-sm btn-primary me-2 d-flex align-items-center"
+                <Stack>
+                  {selectedGroupData.entries.map((entry) => (
+                    <Paper
+                      key={entry.id}
+                      p="sm"
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        borderRadius: '8px',
+                        transition: 'all 0.2s',
+                        ':hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.06)'
+                        }
+                      }}
+                    >
+                      {editingEntryId === entry.id ? (
+                        <Group align="flex-end">
+                          <TextInput
+                            placeholder="Label"
+                            value={tempEntry.label}
+                            onChange={(e) => setTempEntry({ ...tempEntry, label: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                          <TextInput
+                            placeholder="Command"
+                            value={tempEntry.command}
+                            onChange={(e) =>
+                              setTempEntry({ ...tempEntry, command: e.target.value })
+                            }
+                            style={{ flex: 2 }}
+                          />
+                          <ActionIcon
+                            color="teal"
+                            variant="light"
+                            onClick={() => saveEntry(selectedGroup!, entry.id)}
+                          >
+                            <TbCheck size={16} />
+                          </ActionIcon>
+                          <ActionIcon
+                            color="gray"
+                            variant="light"
+                            onClick={() => setEditingEntryId(null)}
+                          >
+                            <TbX size={16} />
+                          </ActionIcon>
+                        </Group>
+                      ) : (
+                        <Group>
+                          <div>
+                            <Text size="md" c="white">
+                              {entry.label}
+                            </Text>
+                            <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                              {entry.command}
+                            </Text>
+                          </div>
+                          <Group>
+                            <Tooltip label="Run" withArrow>
+                              <ActionIcon
+                                color="blue"
+                                variant="light"
                                 onClick={() => runEntry(entry.command)}
-                                title="Jalankan"
                               >
-                                <TbPlayerPlay />
-                              </button>
-                              <button
-                                className="btn btn-sm btn-warning me-2 d-flex align-items-center"
+                                <TbPlayerPlay size={16} />
+                              </ActionIcon>
+                            </Tooltip>
+                            <Tooltip label="Edit" withArrow>
+                              <ActionIcon
+                                color="yellow"
+                                variant="light"
                                 onClick={() => startEditingEntry(entry)}
-                                title="Edit"
                               >
-                                <TbEdit />
-                              </button>
-                              <button
-                                className="btn btn-sm btn-danger d-flex align-items-center"
-                                onClick={() => removeEntry(group.id, entry.id)}
-                                title="Hapus"
+                                <TbEdit size={16} />
+                              </ActionIcon>
+                            </Tooltip>
+                            <Tooltip label="Delete" withArrow>
+                              <ActionIcon
+                                color="red"
+                                variant="light"
+                                onClick={() => removeEntry(selectedGroup!, entry.id)}
                               >
-                                <TbTrash />
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                                <TbTrash size={16} />
+                              </ActionIcon>
+                            </Tooltip>
+                          </Group>
+                        </Group>
+                      )}
+                    </Paper>
+                  ))}
+                </Stack>
               )}
 
-              {/* Form tambah command baru */}
-              <div className="border rounded p-3 bg-light">
-                <h6 className="d-flex align-items-center">
-                  <TbCommand className="me-2" /> Tambah Command Baru
-                </h6>
-                <div className="mb-2">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Label command (Contoh: Backend Server)"
+              {/* Add Command Modal */}
+              <Modal
+                opened={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                title="Add New Command"
+                centered
+              >
+                <Stack>
+                  <TextInput
+                    label="Label"
+                    placeholder="e.g., Start Server"
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
+                    autoFocus
                   />
-                </div>
-                <div className="mb-2">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder='Command (Contoh: code "D:\\Project\\backend")'
+                  <TextInput
+                    label="Command"
+                    placeholder="e.g., npm run dev"
                     value={command}
                     onChange={(e) => setCommand(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        addEntry(selectedGroup!)
+                        setShowAddModal(false)
+                      }
+                    }}
                   />
-                </div>
-                <button
-                  className="btn btn-primary d-flex align-items-center"
-                  onClick={() => addEntry(group.id)}
-                >
-                  <TbPlus className="me-1" /> Tambah Command
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
+                  <Group mt="md">
+                    <Button variant="default" onClick={() => setShowAddModal(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      color="blue"
+                      onClick={() => {
+                        addEntry(selectedGroup!)
+                        setShowAddModal(false)
+                      }}
+                      disabled={!label.trim() || !command.trim()}
+                    >
+                      Add Command
+                    </Button>
+                  </Group>
+                </Stack>
+              </Modal>
+            </>
+          ) : (
+            <Box
+              style={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Text c="dimmed" size="lg">
+                Select a group to view commands
+              </Text>
+            </Box>
+          )}
+        </Grid.Col>
+      </Grid>
     </div>
   )
 }
