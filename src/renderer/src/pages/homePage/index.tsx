@@ -206,7 +206,7 @@ export const HomePage: React.FC = () => {
     : null
 
   return (
-    <div style={{ padding: '1.3rem', height: 'calc(100vh - 4rem)', overflowY: 'hidden' }}>
+    <div style={{ padding: '1.3rem', height: 'calc(100vh - 3.8rem)', overflowY: 'hidden' }}>
       <Grid>
         <Grid.Col
           span={5}
